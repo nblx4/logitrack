@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Create account{% endblock %}
+{% block guest_content %}
+<div class="guest-wrap"> <div class="guest-panel"> <div class="brand"> <span class="brand-mark">LT</span> <div class="brand-text"><strong>LogiTrack</strong><span>Logistics Control Tower</span></div>
+</div>
+<div class="guest-copy"> <h1>Create your customer account.</h1>
+<p>Browse the catalogue, place orders, and track every shipment from placement to delivery.</p>
+</div>
+<div class="credentials-box">
+Warehouse and admin accounts are provisioned separately by system administrators — this form creates <strong>customer</strong> accounts only.
+</div>
+</div>
+<div class="guest-form-side"> <h2>Create account</h2>
+<p class="subtitle">Takes less than a minute.</p>
+<form method="POST"> <div class="field"> <label for="full_name">Full name</label> <input type="text" id="full_name" name="full_name" required placeholder="Your full name"> </div>
+<div class="field-row"> <div class="field"> <label for="username">Username</label> <input type="text" id="username" name="username" required placeholder="Choose a username"> </div>
+<div class="field"> <label for="phone">Phone</label> <input type="text" id="phone" name="phone" placeholder="01X-XXXXXXX"> </div>
+</div>
+<div class="field"> <label for="email">Email</label> <input type="email" id="email" name="email" placeholder="you@example.com"> </div>
+<div class="field"> <label for="address">Delivery address</label> <input type="text" id="address" name="address" placeholder="Street, city, state"> </div>
+<div class="field"> <label for="password">Password</label> <input type="password" id="password" name="password" required placeholder="••••••••"> </div>
+<button type="submit" class="btn btn-primary btn-block">Create account</button> </form>
+<p style="margin-top:16px; font-size:13px;" class="muted">Already have an account? <a href="{{ url_for('login') }}" class="link-plain">Sign in</a></p>
+</div>
+</div>
+{% endblock %}

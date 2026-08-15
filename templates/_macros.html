@@ -1,0 +1,49 @@
+{% macro kpi(title, value, accent='') %}
+<div class="card kpi{% if accent %} accent-{{ accent }}{% endif %}">
+  <div class="kpi-label">{{ title }}</div>
+  <div class="kpi-value">{{ value }}</div>
+  {% if caller %}<div class="kpi-sub">{{ caller() }}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro order_status_pill(status) %}
+{% set colors = {
+  'Pending Payment': 'grey',
+  'Processing': 'blue',
+  'Insufficient Stock': 'red',
+  'Shipped': 'amber',
+  'Delivery Failed': 'red',
+  'Delivered': 'teal',
+  'Cancelled': 'grey'
+} %}
+<span class="pill pill-{{ colors.get(status, 'grey') }}">{{ status }}</span>
+{% endmacro %}
+
+{% macro return_status_pill(status) %}
+{% set colors = {
+  'Requested': 'amber',
+  'Refunded': 'teal',
+  'Rejected': 'red'
+} %}
+<span class="pill pill-{{ colors.get(status, 'grey') }}">{{ status }}</span>
+{% endmacro %}
+
+{% macro lead_time_pill(days) %}
+{% if days >= 20 %}
+<span class="pill pill-red">{{ days }} days</span>
+{% elif days >= 12 %}
+<span class="pill pill-amber">{{ days }} days</span>
+{% else %}
+<span class="pill pill-teal">{{ days }} days</span>
+{% endif %}
+{% endmacro %}
+
+{% macro stock_pill(quantity, reorder_level) %}
+{% if quantity <= 0 %}
+<span class="pill pill-red">Out of stock</span>
+{% elif quantity <= reorder_level %}
+<span class="pill pill-amber">Low · {{ quantity }}</span>
+{% else %}
+<span class="pill pill-teal">In stock · {{ quantity }}</span>
+{% endif %}
+{% endmacro %}

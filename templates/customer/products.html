@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stock_pill %}
+{% block title %}Browse products{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Catalogue</span> <h1>Browse products</h1>
+<p class="desc">Stock levels shown are aggregated across all fulfilment centres.</p>
+</div>
+<form method="GET" style="display:flex; gap:8px;"> <input type="text" name="q" value="{{ q }}" placeholder="Search products or category" style="padding:10px 14px; border:1px solid var(--line); border-radius:8px; width:240px;"> <button class="btn btn-outline" type="submit">Search</button> </form>
+</div>
+<div class="grid grid-4">
+{% for p in products %}
+<div class="product-card"> <span class="cat">{{ p.category }}</span> <h3>{{ p.product_name }}</h3>
+<span class="sku">{{ p.sku }}</span> <div class="price">RM {{ "%.2f"|format(p.unit_price) }}</div>
+<div class="stock-line">{{ stock_pill(p.stock, 20) }}</div>
+<form method="POST" action="{{ url_for('cart_add', product_id=p.product_id) }}"> <input type="number" name="quantity" value="1" min="1" max="{{ p.stock if p.stock > 0 else 1 }}" {% if p.stock <= 0 %}disabled{% endif %}> <button type="submit" class="btn btn-primary btn-sm" {% if p.stock <= 0 %}disabled{% endif %}>Add to cart</button> </form>
+</div>
+{% else %}
+<p class="muted">No products match your search.</p>
+{% endfor %}
+</div>
+{% endblock %}

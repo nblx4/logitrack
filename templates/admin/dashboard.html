@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import kpi %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Command centre</span> <h1>System overview</h1>
+<p class="desc">Live snapshot of orders, inventory and the event stream.</p>
+</div>
+<a href="{{ url_for('admin_reports') }}" class="btn btn-amber">Open reports</a> </div>
+<div class="grid grid-4">
+{% call kpi('Total orders', kpis.total_orders or 0) %}RM {{ "%.2f"|format(kpis.revenue or 0) }} lifetime revenue{% endcall %}
+{% call kpi('Awaiting fulfilment', kpis.processing or 0, 'amber') %}{{ kpis.shipped or 0 }} currently in transit{% endcall %}
+{% call kpi('Delivered', kpis.delivered or 0, 'teal') %}{{ customers }} registered customers{% endcall %}
+{% call kpi('Low stock lines', low_stock, 'red') %}{{ kpis.backorder or 0 }} orders backordered{% endcall %}
+</div>
+<div class="section"> <div class="section-head"> <h2>Live event stream</h2>
+<a href="{{ url_for('admin_events') }}" class="see-all">Full event log →</a> </div>
+<div class="manifest">
+{% for e in recent_events %}
+<div class="manifest-row"> <span class="ev-type">{{ e.event_type }}</span> <span class="ev-time">{{ e.created_at }}</span> <span class="ev-desc">{{ e.description }}</span> <span class="ev-role">{{ e.actor_role or '—' }}</span> </div>
+{% else %}
+<div class="manifest-row"><span class="ev-desc" style="color:#8B96AC;">No events published yet.</span></div>
+{% endfor %}
+</div>
+</div>
+{% endblock %}

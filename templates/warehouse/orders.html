@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_status_pill %}
+{% block title %}Pick & Pack Queue{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Fulfilment</span> <h1>Pick &amp; pack queue</h1>
+<p class="desc">Orders move here once payment is confirmed and inventory is reserved.</p>
+</div>
+<form method="GET" style="display:flex; gap:8px;"> <select name="status" onchange="this.form.submit()" style="padding:9px 12px; border:1px solid var(--line); border-radius:8px;">
+{% for s in ['Processing','Shipped','Delivery Failed','Delivered','Insufficient Stock','Cancelled','All'] %}
+<option value="{{ s }}" {{ 'selected' if status_filter == s }}>{{ s }}</option>
+{% endfor %}
+</select>
+</form>
+</div>
+<div class="table-wrap"> <table> <thead><tr><th>Order</th><th>Customer</th><th>Placed</th><th>Total</th><th>Status</th><th></th></tr></thead>
+<tbody>
+{% for o in orders %}
+<tr> <td class="mono">#{{ o.order_id }}</td> <td>{{ o.customer_name }}</td> <td>{{ o.order_date }}</td> <td>RM {{ "%.2f"|format(o.total_amount) }}</td> <td>{{ order_status_pill(o.order_status) }}</td> <td><a href="{{ url_for('warehouse_order_detail', order_id=o.order_id) }}" class="link-plain">Open →</a></td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="6">No orders in this state.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

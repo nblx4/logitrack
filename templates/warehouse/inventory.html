@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stock_pill, lead_time_pill %}
+{% block title %}Inventory{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">{{ warehouse.warehouse_name }}</span> <h1>Inventory</h1>
+<p class="desc">Stock on hand at your fulfilment centre.</p>
+</div>
+</div>
+<div class="two-col"> <div class="table-wrap"> <table> <thead><tr><th>Product</th><th>Category</th><th>On hand</th><th>Reorder level</th></tr></thead>
+<tbody>
+{% for i in items %}
+<tr> <td><strong>{{ i.product_name }}</strong><br><span class="mono sku">{{ i.sku }}</span></td> <td>{{ i.category }}</td> <td>{{ stock_pill(i.quantity_on_hand, i.reorder_level) }}</td> <td>{{ i.reorder_level }}</td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="4">No inventory records for this warehouse yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="card"> <h3>Receive stock</h3>
+<p class="muted" style="font-size:12.5px;">Log an inbound delivery from a supplier — this feeds the "Replenishment" inflow in the stock-and-flow model and publishes a <span class="mono">StockReceived</span> event.</p>
+<form method="POST" action="{{ url_for('warehouse_receive_stock') }}" style="margin-top:14px;"> <div class="field"> <label for="product_id">Product</label> <select name="product_id" id="product_id" required>
+{% for i in items %}
+<option value="{{ i.product_id }}">{{ i.product_name }} ({{ i.sku }})</option>
+{% endfor %}
+</select>
+</div>
+<div class="field"> <label for="quantity">Quantity received</label> <input type="number" name="quantity" id="quantity" min="1" value="20" required> </div>
+<div class="field"> <label for="supplier_id">Supplier (optional)</label> <select name="supplier_id" id="supplier_id"> <option value="">— Not specified —</option>
+{% for s in suppliers %}
+<option value="{{ s.supplier_id }}">{{ s.supplier_name }} ({{ s.country }})</option>
+{% endfor %}
+</select>
+</div>
+<button type="submit" class="btn btn-teal btn-block">Log received stock</button> </form>
+</div>
+</div>
+<div class="two-col" style="margin-top:16px;">
+<div class="card"> <h3>Report damaged / expired goods</h3>
+<p class="muted" style="font-size:12.5px;">Write off stock that failed quality check — the "damaged goods" outflow from the Inventory stock (Assignment 2, Fig. 4) and publishes a <span class="mono">DamagedGoodsRemoved</span> event.</p>
+<form method="POST" action="{{ url_for('warehouse_report_damaged') }}" style="margin-top:14px;"> <div class="field"> <label for="damage_product_id">Product</label> <select name="product_id" id="damage_product_id" required>
+{% for i in items %}
+<option value="{{ i.product_id }}">{{ i.product_name }} ({{ i.sku }}) — {{ i.quantity_on_hand }} on hand</option>
+{% endfor %}
+</select>
+</div>
+<div class="field"> <label for="damage_quantity">Quantity</label> <input type="number" name="quantity" id="damage_quantity" min="1" value="1" required> </div>
+<div class="field"> <label for="damage_reason">Reason</label> <input type="text" name="reason" id="damage_reason" placeholder="e.g. water damage, expired batch"> </div>
+<button type="submit" class="btn btn-outline btn-block">Write off stock</button> </form>
+</div>
+<div class="card"> <h3>Transfer to another warehouse</h3>
+<p class="muted" style="font-size:12.5px;">Move stock between fulfilment centres — the "goods transferred" inflow/outflow from Assignment 2's stock-and-flow model and publishes a <span class="mono">StockTransferred</span> event.</p>
+<form method="POST" action="{{ url_for('warehouse_transfer_stock') }}" style="margin-top:14px;"> <div class="field"> <label for="transfer_product_id">Product</label> <select name="product_id" id="transfer_product_id" required>
+{% for i in items %}
+<option value="{{ i.product_id }}">{{ i.product_name }} ({{ i.sku }}) — {{ i.quantity_on_hand }} on hand</option>
+{% endfor %}
+</select>
+</div>
+<div class="field"> <label for="dest_warehouse_id">Destination warehouse</label> <select name="dest_warehouse_id" id="dest_warehouse_id" required>
+{% for w in other_warehouses %}
+<option value="{{ w.warehouse_id }}">{{ w.warehouse_name }}</option>
+{% endfor %}
+</select>
+</div>
+<div class="field"> <label for="transfer_quantity">Quantity</label> <input type="number" name="quantity" id="transfer_quantity" min="1" value="10" required> </div>
+<button type="submit" class="btn btn-amber btn-block">Transfer stock</button> </form>
+</div>
+</div>
+<div class="section" style="margin-top:16px;"> <div class="section-head"> <h2>Supplier lead times</h2> </div>
+<p class="muted" style="font-size:12.5px; margin-top:-8px; margin-bottom:12px;">The physical delay each product is exposed to before restocking arrives (Assignment 2, Section 3.3.1) — sorted longest lead time first.</p>
+<div class="table-wrap"> <table> <thead><tr><th>Product</th><th>Supplier</th><th>Origin</th><th>Cost price</th><th>Lead time</th></tr></thead>
+<tbody>
+{% for l in supplier_links %}
+<tr> <td><strong>{{ l.product_name }}</strong><br><span class="mono sku">{{ l.sku }}</span></td> <td>{{ l.supplier_name }}</td> <td>{{ l.country }}</td> <td>RM {{ "%.2f"|format(l.cost_price) }}</td> <td>{{ lead_time_pill(l.lead_time_days) }}</td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="5">No supplier links recorded for this warehouse's products.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% endblock %}

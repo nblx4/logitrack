@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_status_pill, kpi %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Analytics</span> <h1>Reports</h1>
+<p class="desc">Order mix, top movers, stock health and recent order volume.</p>
+</div>
+</div>
+<div class="two-col"> <div class="card"> <h3>Orders by status</h3>
+<div class="divider"></div>
+{% for s in by_status %}
+<div class="bar-row"> <span>{{ s.order_status }}</span> <div class="bar-track"><div class="bar-fill" style="width: {{ (s.c / (by_status | sum(attribute='c')) * 100) if by_status else 0 }}%;"></div></div>
+<span>{{ s.c }}</span> </div>
+{% else %}
+<p class="muted">No orders yet.</p>
+{% endfor %}
+</div>
+<div class="card"> <h3>Order volume — last 14 days</h3>
+<div class="divider"></div>
+{% for d in daily_orders %}
+<div class="bar-row"> <span class="mono" style="font-size:11.5px;">{{ d.d }}</span> <div class="bar-track"><div class="bar-fill teal" style="width: {{ (d.c / max_orders * 100) if max_orders else 0 }}%;"></div></div>
+<span>{{ d.c }}</span> </div>
+{% else %}
+<p class="muted">No orders in this window.</p>
+{% endfor %}
+</div>
+</div>
+<div class="section"> <div class="section-head"><h2>Top products by units sold</h2></div>
+<div class="table-wrap"> <table> <thead><tr><th>Product</th><th>SKU</th><th>Units sold</th><th>Revenue</th></tr></thead>
+<tbody>
+{% for p in top_products %}
+<tr> <td>{{ p.product_name }}</td> <td class="mono">{{ p.sku }}</td> <td>{{ p.units_sold }}</td> <td>RM {{ "%.2f"|format(p.revenue) }}</td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="4">No sales recorded yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"> <div class="section-head"><h2>Low stock report</h2></div>
+<div class="table-wrap"> <table> <thead><tr><th>Product</th><th>Warehouse</th><th>On hand</th><th>Reorder level</th></tr></thead>
+<tbody>
+{% for i in low_stock %}
+<tr> <td>{{ i.product_name }} <span class="mono muted">({{ i.sku }})</span></td> <td>{{ i.warehouse_name }}</td> <td><span class="pill pill-red">{{ i.quantity_on_hand }}</span></td> <td>{{ i.reorder_level }}</td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="4">All stock levels are healthy.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"> <div class="section-head"><h2>Returns summary</h2></div>
+<div class="grid grid-3">
+{% for r in returns_summary %}
+{% call kpi(r.return_status, r.c) %}{% endcall %}
+{% else %}
+<p class="muted">No return activity yet.</p>
+{% endfor %}
+</div>
+</div>
+{% endblock %}

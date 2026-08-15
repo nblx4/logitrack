@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_status_pill %}
+{% block title %}My orders{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Account</span> <h1>My orders</h1>
+<p class="desc">Full order history for your account.</p>
+</div>
+</div>
+<div class="table-wrap"> <table> <thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Total</th><th></th></tr></thead>
+<tbody>
+{% for o in orders %}
+<tr> <td class="mono">#{{ o.order_id }}</td> <td>{{ o.order_date }}</td> <td>{{ order_status_pill(o.order_status) }}</td> <td>RM {{ "%.2f"|format(o.total_amount) }}</td> <td><a href="{{ url_for('customer_order_detail', order_id=o.order_id) }}" class="link-plain">Track →</a></td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="5">No orders yet.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

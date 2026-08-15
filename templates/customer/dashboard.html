@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_status_pill, kpi %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Customer workspace</span> <h1>Welcome back, {{ current_user.full_name.split(' ')[0] }}</h1>
+<p class="desc">Here's what's moving on your account.</p>
+</div>
+<a href="{{ url_for('customer_products') }}" class="btn btn-amber">Browse products</a> </div>
+<div class="card track-widget"> <h3>Track your shipment</h3>
+<form method="GET" action="{{ url_for('customer_track_shipment') }}"> <input type="text" name="tracking_number" placeholder="Enter tracking number, e.g. LT-00042-A1B2C" required> <button type="submit" class="btn btn-primary">Track</button> </form>
+</div>
+<div class="grid grid-4">
+{% call kpi('Total orders', stats.total or 0) %}All-time{% endcall %}
+{% call kpi('In progress', stats.active or 0, 'amber') %}Processing / shipped{% endcall %}
+{% call kpi('Delivered', stats.delivered or 0, 'teal') %}Completed orders{% endcall %}
+{% call kpi('Cart', session.get('cart', {}) | length) %}<a href="{{ url_for('customer_cart') }}" class="link-plain">View cart →</a>{% endcall %}
+</div>
+<div class="section"> <div class="section-head"> <h2>Recent orders</h2>
+<a href="{{ url_for('customer_orders') }}" class="see-all">View all →</a> </div>
+<div class="table-wrap"> <table> <thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Total</th><th></th></tr></thead>
+<tbody>
+{% for o in orders %}
+<tr> <td class="mono">#{{ o.order_id }}</td> <td>{{ o.order_date }}</td> <td>{{ order_status_pill(o.order_status) }}</td> <td>RM {{ "%.2f"|format(o.total_amount) }}</td> <td><a href="{{ url_for('customer_order_detail', order_id=o.order_id) }}" class="link-plain">Track →</a></td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="5">No orders yet — your first order will appear here.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"> <div class="section-head"> <h2>Featured products</h2>
+<a href="{{ url_for('customer_products') }}" class="see-all">Browse catalogue →</a> </div>
+<div class="grid grid-4">
+{% for p in featured %}
+<div class="product-card"> <span class="cat">{{ p.category }}</span> <h3>{{ p.product_name }}</h3>
+<span class="sku">{{ p.sku }}</span> <div class="price">RM {{ "%.2f"|format(p.unit_price) }}</div>
+</div>
+{% endfor %}
+</div>
+</div>
+{% endblock %}

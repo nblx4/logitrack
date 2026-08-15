@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_status_pill %}
+{% block title %}Order #{{ order.order_id }}{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Order fulfilment</span> <h1 class="mono">Order #{{ order.order_id }}</h1>
+<p class="desc">{{ order.customer_name }} · {{ order.address }} · {{ order_status_pill(order.order_status) }}</p>
+</div>
+<a href="{{ url_for('warehouse_orders') }}" class="btn btn-outline">← Back to queue</a> </div>
+<div class="two-col"> <div> <div class="table-wrap"> <table> <thead><tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Subtotal</th></tr></thead>
+<tbody>
+{% for it in items %}
+<tr> <td><strong>{{ it.product_name }}</strong><br><span class="mono sku">{{ it.sku }}</span></td> <td>{{ it.quantity }}</td> <td>RM {{ "%.2f"|format(it.unit_price) }}</td> <td>RM {{ "%.2f"|format(it.subtotal) }}</td> </tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="section"> <div class="card">
+{% if order.order_status == 'Processing' %}
+<h3>Pick, pack &amp; dispatch</h3>
+<p class="muted" style="font-size:13px;">Inventory has already been reserved for this order. Confirm packing and hand it to a carrier.</p>
+<form method="POST" action="{{ url_for('warehouse_ship_order', order_id=order.order_id) }}" style="margin-top:12px;"> <div class="field"> <label for="delivery_provider">Carrier</label> <select name="delivery_provider" id="delivery_provider">
+{% for c in carriers %}<option>{{ c }}</option>{% endfor %}
+</select>
+</div>
+<button type="submit" class="btn btn-amber">Mark picked, packed &amp; dispatched</button> </form>
+{% elif order.order_status == 'Shipped' %}
+<h3>In transit</h3>
+<p class="muted" style="font-size:13px;">Tracking <span class="mono">{{ shipment.tracking_number }}</span> via {{ shipment.delivery_provider }}. Confirm once the carrier reports delivery.</p>
+<form method="POST" action="{{ url_for('warehouse_deliver_order', order_id=order.order_id) }}" style="margin-top:12px; display:inline-block;"> <button type="submit" class="btn btn-teal">Confirm delivered</button> </form>
+<form method="POST" action="{{ url_for('warehouse_delivery_failed', order_id=order.order_id) }}" style="margin-top:12px; display:inline-block;"> <input type="text" name="reason" placeholder="Reason (optional)" style="padding:6px 8px; border:1px solid var(--line); border-radius:6px; font-size:12px;"> <button type="submit" class="btn btn-outline">Delivery failed</button> </form>
+{% elif order.order_status == 'Delivery Failed' %}
+<h3>Delivery attempt failed</h3>
+<p class="muted" style="font-size:13px;">Tracking <span class="mono">{{ shipment.tracking_number if shipment }}</span> via {{ shipment.delivery_provider if shipment }}. Queue a redelivery once the issue is resolved.</p>
+<form method="POST" action="{{ url_for('warehouse_reattempt_delivery', order_id=order.order_id) }}" style="margin-top:12px;"> <button type="submit" class="btn btn-amber">Reattempt delivery</button> </form>
+{% elif order.order_status == 'Insufficient Stock' %}
+<h3>Backordered</h3>
+<p class="muted" style="font-size:13px;">One or more items could not be fully reserved. Receive stock for the affected product(s) from the Inventory page, then this order can be reprocessed.</p>
+{% elif order.order_status == 'Delivered' %}
+<h3>Completed</h3>
+<p class="muted" style="font-size:13px;">This order has been delivered. Tracking <span class="mono">{{ shipment.tracking_number if shipment }}</span>.</p>
+{% elif order.order_status == 'Cancelled' %}
+<h3>Cancelled</h3>
+<p class="muted" style="font-size:13px;">This order was cancelled by the customer. Reserved stock has been released back to inventory.</p>
+{% else %}
+<p class="muted" style="font-size:13px;">Waiting on payment confirmation from the customer.</p>
+{% endif %}
+</div>
+</div>
+</div>
+<div class="card"> <h3>Event timeline</h3>
+<div class="timeline">
+{% for e in timeline %}
+<div class="timeline-item"> <div class="t-type">{{ e.event_type }}</div>
+<div class="t-desc">{{ e.description }}</div>
+<div class="t-time">{{ e.created_at }}</div>
+</div>
+{% else %}
+<div class="timeline-empty">No events yet.</div>
+{% endfor %}
+</div>
+</div>
+</div>
+{% endblock %}

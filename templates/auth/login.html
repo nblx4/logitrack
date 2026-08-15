@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block guest_content %}
+<div class="guest-wrap"> <div class="guest-panel"> <div class="brand"> <span class="brand-mark">LT</span> <div class="brand-text"><strong>LogiTrack</strong><span>Logistics Control Tower</span></div>
+</div>
+<div class="guest-copy"> <h1>One order, five events, three roles.</h1>
+<p>Every action a customer, warehouse or admin takes publishes an event — the same Event-Driven Microservices pattern from the Assignment&nbsp;2 architecture.</p>
+<div class="route-track"> <div class="stop"><span class="dot"></span><div><div class="label">OrderPlaced → PaymentConfirmed</div><div class="sub">Customer checkout</div></div></div>
+<div class="stop"><span class="dot"></span><div><div class="label">InventoryReserved → ShipmentDispatched</div><div class="sub">Warehouse pick, pack &amp; ship</div></div></div>
+<div class="stop"><span class="dot"></span><div><div class="label">OrderDelivered</div><div class="sub">Live in the admin event log</div></div></div>
+</div>
+</div>
+<div class="credentials-box"> <strong>Demo accounts</strong> — customer: <span class="mono">aina / customer123</span> · warehouse: <span class="mono">warehouse1 / warehouse123</span> · admin: <span class="mono">admin / admin123</span> </div>
+</div>
+<div class="guest-form-side"> <h2>Sign in</h2>
+<p class="subtitle">Access your customer, warehouse or admin workspace.</p>
+<form method="POST"> <div class="field"> <label for="username">Username</label> <input type="text" id="username" name="username" required autofocus placeholder="e.g. aina"> </div>
+<div class="field"> <label for="password">Password</label> <input type="password" id="password" name="password" required placeholder="••••••••"> </div>
+<button type="submit" class="btn btn-primary btn-block">Sign in</button> </form>
+<p style="margin-top:16px; font-size:13px;" class="muted">New customer? <a href="{{ url_for('register') }}" class="link-plain">Create an account</a></p>
+</div>
+</div>
+{% endblock %}

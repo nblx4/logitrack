@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Event Log{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Event broker</span> <h1>Event log</h1>
+<p class="desc">Every OrderPlaced, PaymentConfirmed, InventoryReserved, ShipmentDispatched, OrderDelivered, StockReceived, ReorderNeeded and Return event published across the system.</p>
+</div>
+<form method="GET" style="display:flex; gap:8px;"> <select name="type" onchange="this.form.submit()" style="padding:9px 12px; border:1px solid var(--line); border-radius:8px;"> <option value="">All event types</option>
+{% for t in event_types %}
+<option value="{{ t }}" {{ 'selected' if selected == t }}>{{ t }}</option>
+{% endfor %}
+</select>
+</form>
+</div>
+<div class="manifest">
+{% for e in events %}
+<div class="manifest-row"> <span class="ev-type">{{ e.event_type }}</span> <span class="ev-time">{{ e.created_at }}</span> <span class="ev-desc">{{ e.description }}{% if e.order_id %} <span class="mono" style="color:#6C7998;">· order #{{ e.order_id }}</span>{% endif %}</span> <span class="ev-role">{{ e.actor_role or '—' }}</span> </div>
+{% else %}
+<div class="manifest-row"><span class="ev-desc" style="color:#8B96AC;">No events match this filter.</span></div>
+{% endfor %}
+</div>
+{% endblock %}

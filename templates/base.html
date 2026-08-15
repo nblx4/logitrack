@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}LogiTrack{% endblock %} · LogiTrack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="{% if not current_user %}guest{% endif %}">
+{% from "_icons.html" import icon %}
+{% if current_user %}
+<div class="shell">
+<aside class="sidebar">
+<div class="brand"> <span class="brand-mark">LT</span> <div class="brand-text"> <strong>LogiTrack</strong> <span>Logistics Control Tower</span> </div> </div>
+<nav class="nav">
+{% if current_user.role == 'customer' %}
+<span class="nav-label">Shop</span>
+<a href="{{ url_for('customer_dashboard') }}" class="{{ 'active' if request.endpoint=='customer_dashboard' }}">{{ icon('home') }}Overview</a>
+<a href="{{ url_for('customer_products') }}" class="{{ 'active' if request.endpoint=='customer_products' }}">{{ icon('grid') }}Browse Products</a>
+<a href="{{ url_for('customer_cart') }}" class="{{ 'active' if request.endpoint=='customer_cart' }}">{{ icon('cart') }}Cart{% set cc = session.get('cart', {}) | length %}{% if cc %}<span class="badge-count">{{ cc }}</span>{% endif %}</a>
+<span class="nav-label">Account</span>
+<a href="{{ url_for('customer_orders') }}" class="{{ 'active' if request.endpoint in ['customer_orders','customer_order_detail'] }}">{{ icon('package') }}My Orders</a>
+{% elif current_user.role == 'warehouse' %}
+<span class="nav-label">Fulfilment</span>
+<a href="{{ url_for('warehouse_dashboard') }}" class="{{ 'active' if request.endpoint=='warehouse_dashboard' }}">{{ icon('home') }}Overview</a>
+<a href="{{ url_for('warehouse_orders') }}" class="{{ 'active' if request.endpoint in ['warehouse_orders','warehouse_order_detail'] }}">{{ icon('clipboard') }}Pick &amp; Pack Queue</a>
+<a href="{{ url_for('warehouse_inventory') }}" class="{{ 'active' if request.endpoint=='warehouse_inventory' }}">{{ icon('archive') }}Inventory</a>
+<a href="{{ url_for('warehouse_returns') }}" class="{{ 'active' if request.endpoint=='warehouse_returns' }}">{{ icon('undo') }}Returns</a>
+{% elif current_user.role == 'admin' %}
+<span class="nav-label">Command</span>
+<a href="{{ url_for('admin_dashboard') }}" class="{{ 'active' if request.endpoint=='admin_dashboard' }}">{{ icon('home') }}Overview</a>
+<a href="{{ url_for('admin_events') }}" class="{{ 'active' if request.endpoint=='admin_events' }}">{{ icon('activity') }}Event Log</a>
+<a href="{{ url_for('admin_products') }}" class="{{ 'active' if request.endpoint=='admin_products' }}">{{ icon('tag') }}Products</a>
+<a href="{{ url_for('admin_inventory') }}" class="{{ 'active' if request.endpoint=='admin_inventory' }}">{{ icon('archive') }}Inventory</a>
+<a href="{{ url_for('admin_reports') }}" class="{{ 'active' if request.endpoint=='admin_reports' }}">{{ icon('chart') }}Reports</a>
+<a href="{{ url_for('admin_users') }}" class="{{ 'active' if request.endpoint=='admin_users' }}">{{ icon('users') }}Users</a>
+{% endif %}
+</nav>
+<div class="sidebar-foot">
+<div class="user-chip"> <span class="avatar">{{ current_user.full_name[:1] }}</span> <div> <strong>{{ current_user.full_name }}</strong> <span class="role-pill role-{{ current_user.role }}">{{ current_user.role }}</span> </div> </div>
+<a href="{{ url_for('logout') }}" class="logout-link">Sign out</a>
+</div>
+</aside>
+<main class="content">
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-stack">
+{% for category, message in messages %}
+<div class="flash flash-{{ category }}">{{ message }}</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+{% block content %}{% endblock %}
+</main>
+</div>
+{% else %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-stack guest-flash">
+{% for category, message in messages %}
+<div class="flash flash-{{ category }}">{{ message }}</div>
+{% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+{% block guest_content %}{% endblock %}
+{% endif %}
+</body>
+</html>

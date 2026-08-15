@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% from "_macros.html" import return_status_pill %}
+{% block title %}Returns{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Reverse logistics</span> <h1>Return requests</h1>
+<p class="desc">Approve to restock and refund, or reject with the customer notified.</p>
+</div>
+</div>
+<div class="table-wrap"> <table> <thead><tr><th>Return</th><th>Order</th><th>Customer</th><th>Product</th><th>Qty</th><th>Reason</th><th>Status</th><th></th></tr></thead>
+<tbody>
+{% for r in returns %}
+<tr> <td class="mono">#{{ r.return_id }}</td> <td class="mono">#{{ r.order_id }}</td> <td>{{ r.customer_name }}</td> <td>{{ r.product_name }}</td> <td>{{ r.quantity }}</td> <td>{{ r.return_reason }}</td> <td>{{ return_status_pill(r.return_status) }}</td> <td>
+{% if r.return_status == 'Requested' %}
+<form method="POST" action="{{ url_for('warehouse_process_return', return_id=r.return_id) }}" class="inline-actions"> <button name="decision" value="Approved" class="btn btn-teal btn-sm" type="submit">Approve</button> <button name="decision" value="Rejected" class="btn btn-outline btn-sm" type="submit">Reject</button> </form>
+{% else %}<span class="muted">Resolved</span>{% endif %}
+</td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="8">No return requests.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

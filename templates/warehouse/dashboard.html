@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_status_pill, kpi %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">{{ warehouse.warehouse_name }}</span> <h1>Warehouse overview</h1>
+<p class="desc">{{ warehouse.city }}, {{ warehouse.country }} · {{ current_user.full_name }}</p>
+</div>
+<a href="{{ url_for('warehouse_orders') }}" class="btn btn-amber">Open pick &amp; pack queue</a> </div>
+<div class="grid grid-5">
+{% call kpi('Awaiting fulfilment', pending, 'amber') %}Orders in "Processing"{% endcall %}
+{% call kpi('Shipped today', shipped_today, 'teal') %}From this warehouse{% endcall %}
+{% call kpi('Delivery failed', failed_deliveries, 'red') %}<a href="{{ url_for('warehouse_orders', status='Delivery Failed') }}" class="link-plain">Needs reattempt →</a>{% endcall %}
+{% call kpi('Low stock lines', low_stock, 'red') %}At or below reorder level{% endcall %}
+{% call kpi('Pending returns', pending_returns) %}<a href="{{ url_for('warehouse_returns') }}" class="link-plain">Review →</a>{% endcall %}
+</div>
+<div class="section"> <div class="section-head"> <h2>Next in queue</h2>
+<a href="{{ url_for('warehouse_orders') }}" class="see-all">View full queue →</a> </div>
+<div class="table-wrap"> <table> <thead><tr><th>Order</th><th>Customer</th><th>Placed</th><th>Total</th><th>Status</th><th></th></tr></thead>
+<tbody>
+{% for o in queue %}
+<tr> <td class="mono">#{{ o.order_id }}</td> <td>{{ o.customer_name }}</td> <td>{{ o.order_date }}</td> <td>RM {{ "%.2f"|format(o.total_amount) }}</td> <td>{{ order_status_pill(o.order_status) }}</td> <td><a href="{{ url_for('warehouse_order_detail', order_id=o.order_id) }}" class="link-plain">Process →</a></td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="6">Queue is clear — nothing waiting to be picked.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+<div class="section"> <div class="section-head"> <h2>Low stock at your warehouse</h2>
+<a href="{{ url_for('warehouse_inventory') }}" class="see-all">Manage inventory →</a> </div>
+<div class="table-wrap"> <table> <thead><tr><th>Product</th><th>SKU</th><th>On hand</th><th>Reorder level</th></tr></thead>
+<tbody>
+{% for i in low_items %}
+<tr> <td>{{ i.product_name }}</td> <td class="mono">{{ i.sku }}</td> <td><span class="pill pill-red">{{ i.quantity_on_hand }}</span></td> <td>{{ i.reorder_level }}</td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="4">All stock levels are healthy.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% endblock %}

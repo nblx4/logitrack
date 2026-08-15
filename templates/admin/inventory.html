@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "_macros.html" import stock_pill %}
+{% block title %}Inventory{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Stock control</span> <h1>Inventory — all warehouses</h1>
+<p class="desc">Cross-warehouse view of on-hand stock versus reorder levels.</p>
+</div>
+</div>
+<div class="table-wrap"> <table> <thead><tr><th>Product</th><th>Category</th><th>Warehouse</th><th>On hand</th><th>Reorder level</th><th>Last updated</th></tr></thead>
+<tbody>
+{% for i in items %}
+<tr> <td><strong>{{ i.product_name }}</strong><br><span class="mono sku">{{ i.sku }}</span></td> <td>{{ i.category }}</td> <td>{{ i.warehouse_name }}</td> <td>{{ stock_pill(i.quantity_on_hand, i.reorder_level) }}</td> <td>{{ i.reorder_level }}</td> <td class="muted">{{ i.last_updated }}</td> </tr>
+{% else %}
+<tr class="empty-row"><td colspan="6">No inventory records.</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

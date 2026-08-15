@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Your cart{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Checkout</span> <h1>Your cart</h1>
+<p class="desc">Review items before placing your order.</p>
+</div>
+<a href="{{ url_for('customer_products') }}" class="btn btn-outline">Continue shopping</a> </div>
+{% if items %}
+<div class="two-col"> <div class="table-wrap"> <table> <thead><tr><th>Product</th><th>Qty</th><th>Unit price</th><th>Subtotal</th><th></th></tr></thead>
+<tbody>
+{% for it in items %}
+<tr> <td><strong>{{ it.product.product_name }}</strong><br><span class="sku mono">{{ it.product.sku }}</span></td> <td>{{ it.qty }}</td> <td>RM {{ "%.2f"|format(it.product.unit_price) }}</td> <td>RM {{ "%.2f"|format(it.subtotal) }}</td> <td> <form method="POST" action="{{ url_for('cart_remove', product_id=it.product.product_id) }}"> <button class="btn btn-outline btn-sm" type="submit">Remove</button> </form>
+</td> </tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="card"> <h3>Order summary</h3>
+<div class="divider"></div>
+<div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px;"> <span class="muted">Items</span><span>{{ items | length }}</span> </div>
+<div style="display:flex; justify-content:space-between; font-size:18px; font-weight:700; margin-bottom:18px;"> <span>Total</span><span>RM {{ "%.2f"|format(total) }}</span> </div>
+<form method="POST" action="{{ url_for('customer_checkout') }}"> <div class="field"> <label for="payment_method">Payment method</label> <select name="payment_method" id="payment_method"> <option>Credit Card</option>
+<option>Debit Card</option>
+<option>Online Banking (FPX)</option>
+<option>E-Wallet</option>
+</select>
+</div>
+<button type="submit" class="btn btn-teal btn-block">Place order &amp; pay</button> </form>
+<p class="muted" style="font-size:11.5px; margin-top:10px;">Payment is simulated instantly for this demo — a PaymentConfirmed event is published straight away.</p>
+</div>
+</div>
+{% else %}
+<div class="card" style="text-align:center; padding:40px;"> <h3>Your cart is empty</h3>
+<p class="muted">Add a few products to get started.</p>
+<a href="{{ url_for('customer_products') }}" class="btn btn-amber" style="margin-top:12px;">Browse products</a> </div>
+{% endif %}
+{% endblock %}

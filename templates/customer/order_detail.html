@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_macros.html" import order_status_pill, return_status_pill %}
+{% block title %}Order #{{ order.order_id }}{% endblock %}
+{% block content %}
+<div class="page-head"> <div> <span class="eyebrow">Order tracking</span> <h1 class="mono">Order #{{ order.order_id }}</h1>
+<p class="desc">Placed {{ order.order_date }} · {{ order_status_pill(order.order_status) }}</p>
+</div>
+<div style="display:flex; gap:8px;">
+{% if order.order_status in ('Pending Payment', 'Processing', 'Insufficient Stock') %}
+<form method="POST" action="{{ url_for('customer_cancel_order', order_id=order.order_id) }}" onsubmit="return confirm('Cancel this order? Reserved stock will be released.');"> <button class="btn btn-outline btn-sm" type="submit">Cancel order</button> </form>
+{% endif %}
+<a href="{{ url_for('customer_orders') }}" class="btn btn-outline">← All orders</a>
+</div>
+</div>
+<div class="two-col"> <div> <div class="table-wrap"> <table> <thead><tr><th>Item</th><th>Qty</th><th>Unit price</th><th>Subtotal</th></tr></thead>
+<tbody>
+{% for it in items %}
+<tr> <td><strong>{{ it.product_name }}</strong><br><span class="mono sku">{{ it.sku }}</span></td> <td>{{ it.quantity }}</td> <td>RM {{ "%.2f"|format(it.unit_price) }}</td> <td>
+RM {{ "%.2f"|format(it.subtotal) }}
+{% if order.order_status == 'Delivered' and remaining_returnable.get(it.product_id, 0) > 0 %}
+<form method="POST" action="{{ url_for('customer_request_return', order_id=order.order_id) }}" class="return-form"> <input type="hidden" name="product_id" value="{{ it.product_id }}"> <input type="number" name="quantity" min="1" max="{{ remaining_returnable[it.product_id] }}" value="{{ remaining_returnable[it.product_id] }}" title="Quantity to return (max {{ remaining_returnable[it.product_id] }})"> <input type="text" name="reason" placeholder="Reason for return"> <button class="btn btn-outline btn-sm" type="submit">Request return</button> </form>
+{% endif %}
+</td> </tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% if shipment %}
+<div class="section"> <div class="section-head"><h2>Shipment</h2></div>
+<div class="card"> <div class="grid grid-3"> <div><div class="kpi-label">Carrier</div><div style="font-weight:600;">{{ shipment.delivery_provider }}</div></div>
+<div><div class="kpi-label">Tracking number</div><div class="mono" style="font-weight:600;">{{ shipment.tracking_number }}</div></div>
+<div><div class="kpi-label">Status</div><div style="font-weight:600;">{{ shipment.delivery_status }}</div></div>
+<div><div class="kpi-label">Dispatched from</div><div>{{ shipment.warehouse_name }}</div></div>
+<div><div class="kpi-label">Shipped</div><div>{{ shipment.ship_date }}</div></div>
+<div><div class="kpi-label">Expected delivery</div><div>{{ shipment.expected_delivery_date }}</div></div>
+</div>
+</div>
+</div>
+{% endif %}
+{% if returns %}
+<div class="section"> <div class="section-head"><h2>Return requests</h2></div>
+<div class="table-wrap"> <table> <thead><tr><th>Product</th><th>Qty</th><th>Reason</th><th>Status</th><th>Refund</th></tr></thead>
+<tbody>
+{% for r in returns %}
+<tr> <td>{{ r.product_name }}</td> <td>{{ r.quantity }}</td> <td>{{ r.return_reason }}</td> <td>{{ return_status_pill(r.return_status) }}</td> <td>RM {{ "%.2f"|format(r.refund_amount or 0) }}</td> </tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% endif %}
+</div>
+<div> <div class="card"> <h3>Event timeline</h3>
+<p class="muted" style="font-size:12px; margin-top:2px;">Published by the order, payment, inventory and shipment services.</p>
+<div class="timeline">
+{% for e in timeline %}
+<div class="timeline-item"> <div class="t-type">{{ e.event_type }}</div>
+<div class="t-desc">{{ e.description }}</div>
+<div class="t-time">{{ e.created_at }}</div>
+</div>
+{% else %}
+<div class="timeline-empty">No events yet.</div>
+{% endfor %}
+</div>
+</div>
+</div>
+</div>
+{% endblock %}
